@@ -1,5 +1,10 @@
 from datetime import datetime
-from flaskBlogPkg import db
+from flaskBlogPkg import db, login_man
+
+
+@login_man.user_loader()
+def load_user(user_id):
+    return user.query.get(int(user_id))
 
 
 #try to always use lowercase class(aka models) names when using SQLAlchemy

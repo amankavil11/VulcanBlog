@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, flash, redirect
-from flaskBlogPkg import app
+from flaskBlogPkg import app, db, bcrypt
 from flaskBlogPkg.forms import *
 from flaskBlogPkg.models import user, post
 
@@ -34,8 +34,12 @@ def About():
 def Register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f'Account created for {form.username.data}!', 'success')
-        return redirect(url_for('Home'))
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        User = user(username=form.username.data, email=form.email.data, password=hashed_password)
+        db.session.add(User)
+        db.session.commit()
+        flash(f'Account created for {form.username.data}! You\'re now able to login!', 'success')
+        return redirect(url_for('Login'))
     #print(form.errors) ===> use to snuff out errors in forms
     return render_template('register.html', title='Register', form=form)
 
