@@ -12,7 +12,7 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[validators.InputRequired(), validators.Length(min=2, max=15),
                                                      validators.Regexp('^[a-zA-Z0-9@\$\_\#]{0,}$')])
     confirm_password = PasswordField('Confirm Password',
-                                     validators=[validators.InputRequired(), validators.EqualTo('password')])
+                                      validators=[validators.InputRequired(), validators.EqualTo('password')])
     submit = SubmitField("Sign Up")
     
     def validate_username(self, username):
@@ -27,7 +27,7 @@ class RegistrationForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Username/Email', validators=[validators.InputRequired(), validators.Length(min=2, max=15)])
+    username = StringField('Username/Email', validators=[validators.InputRequired(), validators.Length(min=2, max=40)])
     password = PasswordField('Password', validators=[validators.InputRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField("Login")
