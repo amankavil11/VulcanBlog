@@ -12,5 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite+pysqlite:///site.db'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_man = LoginManager(app)
+login_man.login_view = 'Login'
+login_man.login_message_category = 'info'
 
 from flaskBlogPkg import routes
