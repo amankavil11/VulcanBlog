@@ -25,7 +25,7 @@ class user(db.Model, UserMixin):
 class post(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(280), nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.today())
     content = db.Column(db.Text, nullable=False)
     #'user.id' references table name which is automatically lowercase in SQLAlchemy
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

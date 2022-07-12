@@ -1,28 +1,16 @@
+import os
 from flask import Flask, render_template, url_for, flash, redirect, request
 from flaskBlogPkg import app, db, bcrypt
 from flaskBlogPkg.forms import *
 from flaskBlogPkg.models import user, post
 from flask_login import login_user, current_user, logout_user, login_required
-
-posts = [
-    {
-        'author':"Abe Mankavil",
-        'title':"Post #1",
-        'content':"Hello World! First Flask Blog Post",
-        "post_date":"4/20/22"
-    },
-    {
-        'author':"Thomas Jones",
-        'title':"Post #2",
-        'content':"Hello World! Second Flask Blog Post",
-        "post_date":"5/1/22"
-    }
-]
+import secrets
 
 
 @app.route("/")
 @app.route("/home")
 def Home():
+    posts = post.query.all()
     return render_template('home.html', post=posts)
 
 
@@ -75,16 +63,55 @@ def LogOut():
     return redirect(url_for('Home'))
 
 
-@app.route("/account",methods=['GET', 'POST'])
+def save_pic(form_pic):
+    rand_hex = secrets.token_hex(8)
+    # underscore is way of discarding unused variable that wd be produced by splittext function
+    _, file_ext = os.path.splitext(form_pic.filename)
+    pic_fn = rand_hex + file_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', pic_fn)
+    form_pic.save(picture_path)
+    prev_pic = os.path.join(app.root_path, 'static/profile_pics', current_user.image_file)
+    if current_user.image_file != 'default.png':
+        os.remove(prev_pic)
+    return pic_fn
+
+
+@app.route("/account", methods=['GET', 'POST'])
 @login_required
 def Account():
     form = UpdateAccountForm()
     if form.validate_on_submit():
+        if form.picture.data:
+            pic_file = save_pic(form.picture.data)
+            current_user.image_file = pic_file
         current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('Account'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
+
+
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
+def New_Post():
+    form = PostForm()
+    if form.validate_on_submit():
+        Post = post(title=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(Post)
+        db.session.commit()
+        flash('Post has been created', 'success')
+        return redirect((url_for('Home')))
+    return render_template('create_post.html', title='New Post', form=form)
+    
+
+@app.route("/post/<int:post_id>", methods=['GET', 'POST'])
+def IndividualPost(post_id):
+    pass
+    Post = post.query.get_or_404(post_id)
+    return render_template('post.html', title=post.title, post=Post)
 
