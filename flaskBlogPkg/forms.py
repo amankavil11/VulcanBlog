@@ -4,6 +4,7 @@ from wtforms import StringField, validators, PasswordField, SubmitField, Boolean
 from flaskBlogPkg.models import user
 from flask_login import current_user
 
+
 #Below allows you to dictate what can be imported when '*' is used in import statement
 #__all__ = ("RegistrationForm", "LoginForm")
 
@@ -63,3 +64,22 @@ class PostForm(FlaskForm):
     title = StringField('Title', validators=[validators.InputRequired()])
     content = TextAreaField('Content', validators=[validators.InputRequired()])
     submit = SubmitField('Post')
+
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email', validators=[validators.InputRequired(), validators.Email()])
+    submit = SubmitField('Request Password Reset')
+    
+    @staticmethod
+    def validate_email(self, email):
+        User = user.query.filter_by(email=email.data).first()
+        if not User:
+            raise validators.ValidationError('There is no account associated with that email')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[validators.InputRequired(), validators.Length(min=2, max=15),
+                                                     validators.Regexp('^[a-zA-Z0-9@\$\_\#]{0,}$')])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[validators.InputRequired(), validators.EqualTo('password')])
+    submit = SubmitField("Reset Password")

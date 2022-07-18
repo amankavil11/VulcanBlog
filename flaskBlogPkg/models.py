@@ -1,6 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from flaskBlogPkg import db, login_man
 from flask_login import UserMixin
+import jwt
+from decouple import config
 
 
 @login_man.user_loader
@@ -17,6 +19,26 @@ class user(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     # 'post' references model name, hence the capitalization
     posts = db.relationship('post', backref='author', lazy=True)
+    
+    def get_reset_token(self, expires_sec=900):
+        token = jwt.encode(
+            {
+                'user_id': self.id,
+                'exp': (datetime.now(tz=timezone.utc) +
+                        timedelta(seconds=expires_sec))
+            },
+            config('SECRET_KEY'),
+            algorithm="HS256"
+        )
+        return token
+    
+    @staticmethod
+    def verify_reset_token(token):
+        try:
+            user_id = jwt.decode(token, config('SECRET_KEY'), algorithms=["HS256"])['user_id']
+        except jwt.exceptions.ExpiredSignatureError:
+            return None
+        return user.query.get(user_id)
     
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
