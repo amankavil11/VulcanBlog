@@ -1,5 +1,5 @@
 from datetime import datetime, timezone, timedelta
-from flaskBlogPkg import db, login_man
+from flaskBlog import db, login_man
 from flask_login import UserMixin
 import jwt
 from decouple import config
