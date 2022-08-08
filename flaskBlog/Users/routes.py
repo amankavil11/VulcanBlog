@@ -6,6 +6,7 @@ from flaskBlog.Users.forms import *
 from flaskBlog.models import user, post
 from flaskBlog.Users.utils import save_pic, send_reset_email
 
+
 users = Blueprint('Users', __name__)
 
 

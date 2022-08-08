@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
-
+import boto3 as boto
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -17,8 +17,8 @@ mail = Mail()
 def create_app(config_class=Config):
     #template_folder **kwargs is used to change default "template" folder name, in this case to HTML templates
     app = Flask(__name__, template_folder="HTML templates")
-    app.config.from_object(Config)
-
+    app.config.from_object(config_class)
+    
     db.init_app(app)
     bcrypt.init_app(app)
     login_man.init_app(app)
