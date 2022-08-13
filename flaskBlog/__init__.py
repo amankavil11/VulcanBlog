@@ -19,8 +19,6 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     
     db.init_app(app)
-    with app.app_context():
-        db.create_all()
     bcrypt.init_app(app)
     login_man.init_app(app)
     mail.init_app(app)
@@ -34,4 +32,6 @@ def create_app(config_class=Config):
     app.register_blueprint(main)
     app.register_blueprint(errors)
     
-    return app
+    with app.app_context():
+        db.create_all()
+        return app
